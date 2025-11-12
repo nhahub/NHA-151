@@ -1,0 +1,31 @@
+import { createSlice } from '@reduxjs/toolkit';
+
+// Keep reducers pure: avoid side-effects (localStorage) inside reducers.
+// Initial token read is okay on the client side.
+const tokenFromStorage = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+const initialState = {
+  user: null,
+  token: tokenFromStorage || null,
+  isLoggedIn: !!tokenFromStorage,
+};
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    loginSuccess: (state, action) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isLoggedIn = true;
+    },
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isLoggedIn = false;
+    },
+  },
+});
+
+export const { loginSuccess, logout } = authSlice.actions;
+export default authSlice.reducer;
