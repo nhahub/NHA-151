@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { useSafeCart } from "./useCart";
+import { motion } from "framer-motion";
 
 // Cart Item Component
 const CartItem = ({ item, onUpdateQuantity, onRemove }) => {

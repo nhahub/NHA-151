@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { ShoppingBag, Calendar, Clock, Info, X } from "lucide-react";
-import { getMyOrders } from '@/lib/api/api';
+import { getMyOrders } from "@/lib/api/api";
+import { motion } from "framer-motion";
 
 // Orders will be fetched from the API
 
@@ -36,7 +37,10 @@ const OrdersTable = () => {
         if (!mounted) return;
         setOrders(res.data || []);
       } catch (err) {
-        const msg = err?.response?.data?.message || err.message || 'Failed to load orders';
+        const msg =
+          err?.response?.data?.message ||
+          err.message ||
+          "Failed to load orders";
         setError(msg);
       } finally {
         if (mounted) setLoading(false);
@@ -71,27 +75,49 @@ const OrdersTable = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="p-6 text-center text-sm text-secondary/70">
+                <td
+                  colSpan={7}
+                  className="p-6 text-sm text-center text-secondary/70"
+                >
                   Loading orders...
                 </td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={7} className="p-6 text-center text-sm text-red-600">{error}</td>
+                <td
+                  colSpan={7}
+                  className="p-6 text-sm text-center text-red-600"
+                >
+                  {error}
+                </td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-6 text-center text-sm text-secondary/70">No orders found.</td>
+                <td
+                  colSpan={7}
+                  className="p-6 text-sm text-center text-secondary/70"
+                >
+                  No orders found.
+                </td>
               </tr>
             ) : (
               orders.map((order, index) => {
                 const firstItem = order.orderItems && order.orderItems[0];
-                const thumb = firstItem?.image || firstItem?.image || '/placeholder.jpg';
+                const thumb =
+                  firstItem?.image || firstItem?.image || "/placeholder.jpg";
                 const title = firstItem?.name || `Order ${order._id}`;
-                const qty = order.orderItems ? order.orderItems.reduce((s, it) => s + (it.qty || 0), 0) : 0;
+                const qty = order.orderItems
+                  ? order.orderItems.reduce((s, it) => s + (it.qty || 0), 0)
+                  : 0;
                 const price = order.totalPrice ?? order.itemsPrice ?? 0;
-                const date = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '';
-                const statusLabel = order.isDelivered ? 'Delivered' : order.isPaid ? 'Paid' : 'Processing';
+                const date = order.createdAt
+                  ? new Date(order.createdAt).toLocaleDateString()
+                  : "";
+                const statusLabel = order.isDelivered
+                  ? "Delivered"
+                  : order.isPaid
+                  ? "Paid"
+                  : "Processing";
                 return (
                   <Motion.tr
                     key={order._id}
@@ -102,7 +128,11 @@ const OrdersTable = () => {
                   >
                     <td className="p-3 font-medium">{order._id}</td>
                     <td className="flex items-center gap-2 p-3">
-                      <img src={thumb} alt={title} className="object-cover w-10 h-10 rounded-lg" />
+                      <img
+                        src={thumb}
+                        alt={title}
+                        className="object-cover w-10 h-10 rounded-lg"
+                      />
                       {title}
                     </td>
                     <td className="p-3">{qty}</td>
@@ -111,12 +141,19 @@ const OrdersTable = () => {
                       <Calendar size={14} /> {date}
                     </td>
                     <td className="p-3">
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(statusLabel)}`}>
+                      <span
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                          statusLabel
+                        )}`}
+                      >
                         {statusLabel}
                       </span>
                     </td>
                     <td className="p-3 text-right">
-                      <button onClick={() => setSelectedOrder(order)} className="flex items-center gap-1 text-primary hover:text-primary/80">
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="flex items-center gap-1 text-primary hover:text-primary/80"
+                      >
                         <Info size={16} /> View
                       </button>
                     </td>
@@ -131,28 +168,58 @@ const OrdersTable = () => {
       {/* Mobile Cards */}
       <div className="space-y-3 md:hidden">
         {loading ? (
-          <div className="p-4 text-center text-sm text-secondary/70">Loading orders...</div>
+          <div className="p-4 text-sm text-center text-secondary/70">
+            Loading orders...
+          </div>
         ) : error ? (
-          <div className="p-4 text-center text-sm text-red-600">{error}</div>
+          <div className="p-4 text-sm text-center text-red-600">{error}</div>
         ) : orders.length === 0 ? (
-          <div className="p-4 text-center text-sm text-secondary/70">No orders found.</div>
+          <div className="p-4 text-sm text-center text-secondary/70">
+            No orders found.
+          </div>
         ) : (
           orders.map((order, index) => {
             const firstItem = order.orderItems && order.orderItems[0];
-            const thumb = firstItem?.image || '/placeholder.jpg';
+            const thumb = firstItem?.image || "/placeholder.jpg";
             const title = firstItem?.name || `Order ${order._id}`;
-            const qty = order.orderItems ? order.orderItems.reduce((s, it) => s + (it.qty || 0), 0) : 0;
+            const qty = order.orderItems
+              ? order.orderItems.reduce((s, it) => s + (it.qty || 0), 0)
+              : 0;
             const price = order.totalPrice ?? order.itemsPrice ?? 0;
-            const date = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '';
-            const statusLabel = order.isDelivered ? 'Delivered' : order.isPaid ? 'Paid' : 'Processing';
+            const date = order.createdAt
+              ? new Date(order.createdAt).toLocaleDateString()
+              : "";
+            const statusLabel = order.isDelivered
+              ? "Delivered"
+              : order.isPaid
+              ? "Paid"
+              : "Processing";
             return (
-              <Motion.div key={order._id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06 }} className="flex flex-col p-4 border shadow-sm rounded-xl">
+              <Motion.div
+                key={order._id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06 }}
+                className="flex flex-col p-4 border shadow-sm rounded-xl"
+              >
                 <div className="flex items-center gap-3">
-                  <img src={thumb} alt={title} className="object-cover w-14 h-14 rounded-xl" />
+                  <img
+                    src={thumb}
+                    alt={title}
+                    className="object-cover w-14 h-14 rounded-xl"
+                  />
                   <div>
                     <h4 className="font-semibold text-primary">{title}</h4>
-                    <p className="flex items-center gap-1 text-sm text-secondary"><Clock size={14} /> {date}</p>
-                    <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(statusLabel)}`}>{statusLabel}</span>
+                    <p className="flex items-center gap-1 text-sm text-secondary">
+                      <Clock size={14} /> {date}
+                    </p>
+                    <span
+                      className={`inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(
+                        statusLabel
+                      )}`}
+                    >
+                      {statusLabel}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-2">
@@ -160,7 +227,12 @@ const OrdersTable = () => {
                     <p className="font-medium">{price} EGP</p>
                     <p className="text-xs text-secondary">x{qty}</p>
                   </div>
-                  <button onClick={() => setSelectedOrder(order)} className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"><Info size={14} /> View</button>
+                  <button
+                    onClick={() => setSelectedOrder(order)}
+                    className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"
+                  >
+                    <Info size={14} /> View
+                  </button>
                 </div>
               </Motion.div>
             );

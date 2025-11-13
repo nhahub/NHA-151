@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { User, Mail, Edit } from "lucide-react";
+import { motion } from "framer-motion";
 
 const ProfileCard = ({ user, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);

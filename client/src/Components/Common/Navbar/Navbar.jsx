@@ -27,6 +27,9 @@ import {
 import { useCart } from "../Cart/useCart";
 import Cart from "../Cart/Cart";
 
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../../redux/authSlice"; // أو حسب مسار authSlice عندك
+
 const navigation = {
   categories: [
     {
@@ -151,6 +154,8 @@ const navigation = {
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const { openCart, cartItems } = useCart();
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useSelector((state) => state.auth);
 
   return (
     <div className="sticky top-0 left-0 z-50 bg-white">
@@ -270,22 +275,45 @@ export default function NavBar() {
             </div>
 
             <div className="px-4 py-6 space-y-6 border-t border-gray-200">
-              <div className="flow-root">
-                <Link
-                  to="/signin"
-                  className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
-                >
-                  Sign in
-                </Link>
-              </div>
-              <div className="flow-root">
-                <Link
-                  to="/signup"
-                  className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
-                >
-                  Create account
-                </Link>
-              </div>
+              {isLoggedIn ? (
+                <>
+                  <div className="flow-root">
+                    <Link
+                      to="/myaccount"
+                      className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
+                    >
+                      My Account
+                    </Link>
+                  </div>
+                  <div className="flow-root">
+                    <button
+                      onClick={() => dispatch(logout())}
+                      className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flow-root">
+                    <Link
+                      to="/signin"
+                      className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                  <div className="flow-root">
+                    <Link
+                      to="/signup"
+                      className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
+                    >
+                      Create Account
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
           </DialogPanel>
         </div>
@@ -431,19 +459,45 @@ export default function NavBar() {
 
               <div className="flex items-center ml-auto">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  <Link
-                    to="/signin"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
-                  >
-                    Sign in
-                  </Link>
-                  <span aria-hidden="true" className="w-px h-6 bg-gray-200" />
-                  <Link
-                    to="/signup"
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
-                  >
-                    Create account
-                  </Link>
+                  {isLoggedIn ? (
+                    <>
+                      <Link
+                        to="/myaccount"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      >
+                        My Account
+                      </Link>
+                      <span
+                        aria-hidden="true"
+                        className="w-px h-6 bg-gray-200"
+                      />
+                      <button
+                        onClick={() => dispatch(logout())}
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      >
+                        Log Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/signin"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      >
+                        Sign In
+                      </Link>
+                      <span
+                        aria-hidden="true"
+                        className="w-px h-6 bg-gray-200"
+                      />
+                      <Link
+                        to="/signup"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                      >
+                        Create Account
+                      </Link>
+                    </>
+                  )}
                 </div>
 
                 {/* Cart */}

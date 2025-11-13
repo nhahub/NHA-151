@@ -27,11 +27,13 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../../redux/authSlice";
 import { registerUser, loginUser } from "../../../lib/api/api";
 import React from "react";
+import { ForgotPasswordDialog } from "./ForgetPassword";
 
 // Define validation schemas using Zod
 // Schema for signup form
 const signupSchema = z
   .object({
+    name: z.string().min(4, "Name must be at least 4 characters"),
     email: z.string().email("Please enter a valid email"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
@@ -43,6 +45,7 @@ const signupSchema = z
 
 // Schema for login form
 const loginSchema = z.object({
+  name: z.string().optional(),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
@@ -57,6 +60,8 @@ export function SignupForm({ className, defaultMode, ...props }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+
+  const [forgetPassword, setForgetPassword] = useState(false);
 
   // Choose the appropriate schema based on the form type
   const schema = isLogin ? loginSchema : signupSchema;
@@ -77,10 +82,17 @@ export function SignupForm({ className, defaultMode, ...props }) {
 
   // Monitor password field for hashed values
   React.useEffect(() => {
-    if (typeof passwordValue === 'string' && /^\$2[aby]\$\d{2}\$/.test(passwordValue)) {
-      console.warn('⚠️ Bcrypt hash detected in password field! Clearing autofill...');
+    if (
+      typeof passwordValue === "string" &&
+      /^\$2[aby]\$\d{2}\$/.test(passwordValue)
+    ) {
+      console.warn(
+        "⚠️ Bcrypt hash detected in password field! Clearing autofill..."
+      );
       setValue("password", "");
-      alert('❌ Browser autofilled a hashed password! Please manually type your plain text password.');
+      alert(
+        "❌ Browser autofilled a hashed password! Please manually type your plain text password."
+      );
     }
   }, [passwordValue, setValue]);
 
@@ -88,8 +100,13 @@ export function SignupForm({ className, defaultMode, ...props }) {
   const onSubmit = async (data) => {
     try {
       // Final check before submission
-      if (typeof data.password === 'string' && /^\$2[aby]\$\d{2}\$/.test(data.password)) {
-        alert('❌ Invalid password format! Please enter your plain text password, not a hash.');
+      if (
+        typeof data.password === "string" &&
+        /^\$2[aby]\$\d{2}\$/.test(data.password)
+      ) {
+        alert(
+          "❌ Invalid password format! Please enter your plain text password, not a hash."
+        );
         return;
       }
 
@@ -102,6 +119,7 @@ export function SignupForm({ className, defaultMode, ...props }) {
 
       // بعد نجاح العملية خزني بيانات المستخدم في Redux وLocalStorage
       const userData = response.data;
+      console.log(userData);
       dispatch(
         loginSuccess({
           user: {
@@ -116,7 +134,7 @@ export function SignupForm({ className, defaultMode, ...props }) {
 
       // Store token in localStorage
       if (userData.token) {
-        localStorage.setItem('token', userData.token);
+        localStorage.setItem("token", userData.token);
       }
 
       alert(isLogin ? "Logged in successfully!" : "Account created!");
@@ -167,6 +185,22 @@ export function SignupForm({ className, defaultMode, ...props }) {
                         : "Enter your details below to create your account."}
                     </p>
                   </div>
+                  {/* Name Field */}
+                  <Field>
+                    <FieldLabel htmlFor="name">Name</FieldLabel>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Your full name"
+                      {...register("name")}
+                    />
+                    {errors.name && (
+                      <p className="mt-0.5 text-sm text-red-500">
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </Field>
+
                   {/* Email Field */}
                   <Field>
                     <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -193,12 +227,13 @@ export function SignupForm({ className, defaultMode, ...props }) {
                       <div className="flex items-center">
                         <FieldLabel htmlFor="password">Password</FieldLabel>
                         {isLogin && (
-                          <a
-                            href="#"
+                          <button
+                            type="button"
                             className="ml-auto text-sm underline-offset-2 hover:underline "
+                            onClick={() => setForgetPassword(true)}
                           >
                             Forgot your password?
-                          </a>
+                          </button>
                         )}
                       </div>
                       <Input
@@ -344,6 +379,10 @@ export function SignupForm({ className, defaultMode, ...props }) {
 
           <TermsOfService isOpen={isOpen} setIsOpen={setIsOpen} />
           <PrivacyPolicy isOpen={isPrivacyOpen} setIsOpen={setIsPrivacyOpen} />
+          <ForgotPasswordDialog
+            forgetPassword={forgetPassword}
+            setForgetPassword={setForgetPassword}
+          />
         </Motion.div>
       </AnimatePresence>
     </div>

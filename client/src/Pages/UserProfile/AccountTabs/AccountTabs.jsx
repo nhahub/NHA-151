@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Tab } from "@headlessui/react";
 import { User, MapPin, ShoppingCart, Lock } from "lucide-react";
 import OrdersTable from "../OrdersTable/OrdersTable";
+import { motion } from "framer-motion";
 
 const tabs = [
   { name: "Profile", icon: User },
