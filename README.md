@@ -132,24 +132,19 @@ This starts both frontend (http://localhost:3000) and backend (http://localhost:
 - Health check endpoint
 
 ## 📚 API Documentation
+Full API documentation (endpoints, request/response examples, auth and error details) is available in `docs/api.md`.
 
-Access Swagger UI at: `http://localhost:5002/api-docs`
+If your deployment exposes Swagger UI it may be available at `http://localhost:5002/api-docs` when enabled by the server.
 
-### Auth Endpoints
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `POST /api/auth/reset-password` - Password reset
+Key endpoint groups:
+- **Auth:** `/api/auth/*` (register, login, profile, sessions, password reset)
+- **Products:** `/api/products/*` (search, list, details, reviews, admin CRUD)
+- **Categories / Subcategories:** `/api/categories/*`, `/api/subcategories/*`
+- **Cart / Orders:** `/api/cart/*`, `/api/orders/*` (create order, my orders, admin order management)
+- **Payments:** `/api/payments/*` (create payment, verify, webhooks)
+- **Support / Contact / Newsletter / Analytics:** `/api/support/*`, `/api/contact`, `/api/newsletter/*`, `/api/analytics/*`
 
-### Products
-- `GET /api/products` - List products
-- `GET /api/products/:id` - Get product details
-- `GET /api/categories` - List categories
-
-### Orders
-- `POST /api/orders` - Create order
-- `GET /api/orders/myorders` - Get user's orders
-- `GET /api/orders/:id` - Get order details
+See `docs/api.md` for full details and examples.
 
 ## 🧪 Testing
 
