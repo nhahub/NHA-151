@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../../../assets/images/logo.png";
 
 import { Fragment, useState } from "react";
@@ -155,7 +155,16 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   const { openCart, cartItems } = useCart();
   const dispatch = useDispatch();
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const { isLoggedIn, user } = useSelector((state) => state.auth);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    // Clear localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
   return (
     <div className="sticky top-0 left-0 z-50 bg-white">
@@ -277,6 +286,19 @@ export default function NavBar() {
             <div className="px-4 py-6 space-y-6 border-t border-gray-200">
               {isLoggedIn ? (
                 <>
+                  {user?.isAdmin ? (
+                    <div className="flow-root">
+                      <Link
+                        to="/admin"
+                        className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
+                      >
+                        Dashboard
+                      </Link>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+
                   <div className="flow-root">
                     <Link
                       to="/myaccount"
@@ -287,7 +309,7 @@ export default function NavBar() {
                   </div>
                   <div className="flow-root">
                     <button
-                      onClick={() => dispatch(logout())}
+                      onClick={handleLogout}
                       className="block p-2 -m-2 font-medium text-gray-900 hover:text-lime-600"
                     >
                       Log Out
@@ -427,7 +449,7 @@ export default function NavBar() {
                                     ))}
                                   </div>
 
-                                  <div className="-mt-26">
+                                  <div className="-mt-14">
                                     <Link
                                       to={`/${category.id}`}
                                       onClick={() => close()}
@@ -461,6 +483,16 @@ export default function NavBar() {
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
                   {isLoggedIn ? (
                     <>
+                      {user?.isAdmin ? (
+                        <Link
+                          to="/admin"
+                          className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                        >
+                          Dashboard
+                        </Link>
+                      ) : (
+                        ""
+                      )}
                       <Link
                         to="/myaccount"
                         className="text-sm font-medium text-gray-700 hover:text-gray-800"
@@ -472,7 +504,7 @@ export default function NavBar() {
                         className="w-px h-6 bg-gray-200"
                       />
                       <button
-                        onClick={() => dispatch(logout())}
+                        onClick={handleLogout}
                         className="text-sm font-medium text-gray-700 hover:text-gray-800"
                       >
                         Log Out

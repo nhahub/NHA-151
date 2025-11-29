@@ -12,7 +12,19 @@ const Outdoor = lazy(() => import("../Pages/Outdoor/Outdoor"));
 const PlantDetails = lazy(() => import("../Pages/PlantDetails/PlantDetails"));
 const Checkout = lazy(() => import("@/Pages/Checkout/Checkout"));
 const UserAccount = lazy(() => import("@/Pages/UserProfile/UserAccount"));
-const AdminDashboard = lazy(() => import("../Pages/AdminDashboard/AdminDashboard"));
+const OrderDetails = lazy(() => import("../Pages/Order/OrderDetails"));
+const AdminDashboard = lazy(() =>
+  import("../Pages/AdminDashboard/AdminDashboard")
+);
+const NotFound = lazy(() => import("../Pages/NotFoundPage/NotFoundPage"));
+const AdminLayout = lazy(() => import("../Layouts/LayoutDashboard"));
+const AdminOrders = lazy(() => import("../Pages/AdminDashboard/AdminOrders"));
+const AdminProducts = lazy(() =>
+  import("../Pages/AdminDashboard/AdminProducts")
+);
+const AdminUsers = lazy(() => import("../Pages/AdminDashboard/AdminUsers"));
+const AdminMessages = lazy(() => import("../Pages/AdminDashboard/AdminMessages"));
+const AdminAccount = lazy(() => import("../Pages/AdminDashboard/AdminAccount"));
 
 export const router = createBrowserRouter([
   {
@@ -76,6 +88,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "/order/:id",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <OrderDetails />
+          </Suspense>
+        ),
+      },
+      {
         path: "/myaccount",
         element: (
           <Suspense fallback={<Loading />}>
@@ -105,7 +125,66 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: (
       <Suspense fallback={<Loading />}>
-        <AdminDashboard />
+        <AdminLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AdminDashboard />
+          </Suspense>
+        ),
+      },
+      {
+        path: "orders",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AdminOrders />
+          </Suspense>
+        ),
+      },
+      {
+        path: "products",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AdminProducts />
+          </Suspense>
+        ),
+      },
+      {
+        path: "messages",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AdminMessages />
+          </Suspense>
+        ),
+      },
+      {
+        path: "users",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AdminUsers />
+          </Suspense>
+        ),
+      },
+      {
+        path: "adminaccount",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AdminAccount />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+
+  {
+    path: "*",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <NotFound />
       </Suspense>
     ),
   },

@@ -1,20 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AnimatePresence, motion as Motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ShoppingBag, Calendar, Clock, Info, X } from "lucide-react";
 import { getMyOrders } from "@/lib/api/api";
-import { motion } from "framer-motion";
-
-// Orders will be fetched from the API
 
 const getStatusColor = (status) => {
   switch (status) {
     case "Delivered":
       return "text-green-600 bg-green-100";
-    case "Processing":
+    case "Paid":
       return "text-amber-600 bg-amber-100";
-    case "Pending":
+    case "Processing":
       return "text-gray-600 bg-gray-100";
     default:
       return "text-secondary bg-gray-50";
@@ -29,13 +26,15 @@ const OrdersTable = () => {
 
   useEffect(() => {
     let mounted = true;
+
     const fetchOrders = async () => {
       setLoading(true);
       setError(null);
       try {
         const res = await getMyOrders();
         if (!mounted) return;
-        setOrders(res.data || []);
+        // Fix: orders array is in res.data.data
+        setOrders(Array.isArray(res.data?.data) ? res.data.data : []);
       } catch (err) {
         const msg =
           err?.response?.data?.message ||
@@ -46,11 +45,37 @@ const OrdersTable = () => {
         if (mounted) setLoading(false);
       }
     };
+
     fetchOrders();
     return () => {
       mounted = false;
     };
   }, []);
+
+  const handleViewOrder = (order) => {
+    const firstItem = order.orderItems?.[0] || {};
+    setSelectedOrder({
+      id: order._id,
+      product: firstItem.name || `Order ${order._id}`,
+      thumbnail: firstItem.image || "/placeholder.jpg",
+      quantity: order.orderItems?.reduce(
+        (sum, item) => sum + (item.qty || 0),
+        0
+      ),
+      price: order.totalPrice ?? 0,
+      status: order.isDelivered
+        ? "Delivered"
+        : order.isPaid
+        ? "Paid"
+        : "Processing",
+      date: order.createdAt
+        ? new Date(order.createdAt).toLocaleDateString()
+        : "",
+      details: order.orderItems
+        ?.map((it) => `${it.name} x${it.qty}`)
+        .join(", "),
+    });
+  };
 
   return (
     <div className="p-4 bg-white shadow rounded-2xl">
@@ -102,14 +127,13 @@ const OrdersTable = () => {
               </tr>
             ) : (
               orders.map((order, index) => {
-                const firstItem = order.orderItems && order.orderItems[0];
-                const thumb =
-                  firstItem?.image || firstItem?.image || "/placeholder.jpg";
-                const title = firstItem?.name || `Order ${order._id}`;
-                const qty = order.orderItems
-                  ? order.orderItems.reduce((s, it) => s + (it.qty || 0), 0)
-                  : 0;
-                const price = order.totalPrice ?? order.itemsPrice ?? 0;
+                const firstItem = order.orderItems?.[0] || {};
+                const thumb = firstItem.image || "/placeholder.jpg";
+                const title = firstItem.name || `Order ${order._id}`;
+                const qty =
+                  order.orderItems?.reduce((s, it) => s + (it.qty || 0), 0) ||
+                  0;
+                const price = order.totalPrice ?? 0;
                 const date = order.createdAt
                   ? new Date(order.createdAt).toLocaleDateString()
                   : "";
@@ -118,8 +142,9 @@ const OrdersTable = () => {
                   : order.isPaid
                   ? "Paid"
                   : "Processing";
+
                 return (
-                  <Motion.tr
+                  <motion.tr
                     key={order._id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -151,13 +176,13 @@ const OrdersTable = () => {
                     </td>
                     <td className="p-3 text-right">
                       <button
-                        onClick={() => setSelectedOrder(order)}
+                        onClick={() => handleViewOrder(order)}
                         className="flex items-center gap-1 text-primary hover:text-primary/80"
                       >
                         <Info size={16} /> View
                       </button>
                     </td>
-                  </Motion.tr>
+                  </motion.tr>
                 );
               })
             )}
@@ -179,13 +204,12 @@ const OrdersTable = () => {
           </div>
         ) : (
           orders.map((order, index) => {
-            const firstItem = order.orderItems && order.orderItems[0];
-            const thumb = firstItem?.image || "/placeholder.jpg";
-            const title = firstItem?.name || `Order ${order._id}`;
-            const qty = order.orderItems
-              ? order.orderItems.reduce((s, it) => s + (it.qty || 0), 0)
-              : 0;
-            const price = order.totalPrice ?? order.itemsPrice ?? 0;
+            const firstItem = order.orderItems?.[0] || {};
+            const thumb = firstItem.image || "/placeholder.jpg";
+            const title = firstItem.name || `Order ${order._id}`;
+            const qty =
+              order.orderItems?.reduce((s, it) => s + (it.qty || 0), 0) || 0;
+            const price = order.totalPrice ?? 0;
             const date = order.createdAt
               ? new Date(order.createdAt).toLocaleDateString()
               : "";
@@ -194,8 +218,9 @@ const OrdersTable = () => {
               : order.isPaid
               ? "Paid"
               : "Processing";
+
             return (
-              <Motion.div
+              <motion.div
                 key={order._id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -228,13 +253,13 @@ const OrdersTable = () => {
                     <p className="text-xs text-secondary">x{qty}</p>
                   </div>
                   <button
-                    onClick={() => setSelectedOrder(order)}
+                    onClick={() => handleViewOrder(order)}
                     className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"
                   >
                     <Info size={14} /> View
                   </button>
                 </div>
-              </Motion.div>
+              </motion.div>
             );
           })
         )}

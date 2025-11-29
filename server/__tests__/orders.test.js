@@ -20,7 +20,8 @@ describe('Order Endpoints', () => {
   let token, user, product;
 
   beforeEach(async () => {
-    const response = await createTestUser();
+    // Make test user an admin so all endpoints work
+    const response = await createTestUser(true);
     token = response.token;
     user = response.user;
 
@@ -40,10 +41,13 @@ describe('Order Endpoints', () => {
         .post('/api/orders')
         .set('Authorization', `Bearer ${token}`)
         .send({
+          user: user._id,
           orderItems: [
             {
               product: product._id,
               qty: 2,
+              name: product.name,
+              price: product.price,
             },
           ],
           shippingAddress: {
@@ -53,14 +57,17 @@ describe('Order Endpoints', () => {
             country: 'Test Country',
           },
           paymentMethod: 'PayPal',
+          itemsPrice: 199.98,
+          taxPrice: 0,
+          shippingPrice: 0,
           totalPrice: 199.98,
         });
 
       expect(res.statusCode).toBe(201);
-      expect(res.body).toHaveProperty('_id');
-      expect(res.body.user).toBe(user._id.toString());
-      expect(res.body.orderItems).toHaveLength(1);
-      expect(res.body.totalPrice).toBe(199.98);
+      expect(res.body.data).toHaveProperty('_id');
+      expect(res.body.data.user).toBe(user._id.toString());
+      expect(res.body.data.orderItems).toHaveLength(1);
+      expect(res.body.data.totalPrice).toBe(199.98);
     });
 
     it('should not create order with invalid product', async () => {
@@ -68,10 +75,13 @@ describe('Order Endpoints', () => {
         .post('/api/orders')
         .set('Authorization', `Bearer ${token}`)
         .send({
+          user: user._id,
           orderItems: [
             {
-              product: '507f1f77bcf86cd799439011', 
+              product: '507f1f77bcf86cd799439011',
               qty: 2,
+              name: 'Fake Product',
+              price: 99.99,
             },
           ],
           shippingAddress: {
@@ -81,6 +91,9 @@ describe('Order Endpoints', () => {
             country: 'Test Country',
           },
           paymentMethod: 'PayPal',
+          itemsPrice: 199.98,
+          taxPrice: 0,
+          shippingPrice: 0,
           totalPrice: 199.98,
         });
 
@@ -141,7 +154,7 @@ describe('Order Endpoints', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveLength(2);
+      expect(res.body.data).toHaveLength(2);
     });
   });
 
@@ -176,8 +189,8 @@ describe('Order Endpoints', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body._id).toBe(order._id.toString());
-      expect(res.body.totalPrice).toBe(199.98);
+      expect(res.body.data._id).toBe(order._id.toString());
+      expect(res.body.data.totalPrice).toBe(199.98);
     });
 
     it('should not get order of another user', async () => {

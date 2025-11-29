@@ -13,6 +13,8 @@ const {
   updateUserProfile,
   forgotPassword,
   resetPassword,
+  updateAdminPassword,
+  updateAdminProfile,
 } = require('../controllers/authController');
 const validate = require('../middleware/validationMiddleware');
 const {
@@ -29,6 +31,8 @@ router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, validate(updateProfileValidation), updateUserProfile);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:token', validate(resetPasswordValidation), resetPassword);
+router.put('/admin/update-password', protect, updateAdminPassword);
+router.put('/admin/update-profile', protect, updateAdminProfile);
 
 router.post('/logout', protect, logoutUser);
 router.get('/sessions', protect, listSessions);

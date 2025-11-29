@@ -75,15 +75,21 @@ const getProductById = asyncHandler(async (req, res) => {
 
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, category, subcategory, countInStock } = req.body;
+  const { name, description = "", price, category, subcategory, countInStock, images, careInfo, features } = req.body;
+
+  // Filter out empty strings from features array
+  const cleanFeatures = Array.isArray(features) ? features.filter(f => f && f.trim()) : [];
 
   const product = await Product.create({
     name,
-    description,
+    description: description || "",
     price,
     category,
     subcategory,
     countInStock,
+    images,
+    careInfo,
+    features: cleanFeatures,
     seller: req.user._id,
   });
 
@@ -100,7 +106,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, category, subcategory, countInStock } = req.body;
+  const { name, description, price, category, subcategory, countInStock, images, careInfo, features } = req.body;
 
   const product = await Product.findById(req.params.id);
 
@@ -111,6 +117,12 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.category = category || product.category;
     product.subcategory = subcategory || product.subcategory;
     product.countInStock = countInStock || product.countInStock;
+    if (images) product.images = images;
+    if (careInfo) product.careInfo = careInfo;
+    // Filter out empty strings from features array
+    if (features) {
+      product.features = Array.isArray(features) ? features.filter(f => f && f.trim()) : [];
+    }
 
     const updatedProduct = await product.save();
     const populatedProduct = await Product.findById(updatedProduct._id)
@@ -230,6 +242,17 @@ const searchProducts = asyncHandler(async (req, res) => {
   res.json(products);
 });
 
+
+const deleteProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    res.status(404);
+    throw new Error('Product not found');
+  }
+  await Product.deleteOne({ _id: req.params.id });
+  res.json({ message: 'Product deleted' });
+});
+
 module.exports = {
   getProducts,
   getProductById,
@@ -241,4 +264,5 @@ module.exports = {
   getFeaturedProducts,
   getProductsByBrand,
   searchProducts,
+  deleteProduct,
 };

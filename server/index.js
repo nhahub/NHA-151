@@ -43,9 +43,13 @@ app.resetRateLimit = async () => {
       if (app.locals.rateLimiters) {
         for (const limiter of app.locals.rateLimiters) {
           if (limiter && typeof limiter.resetAll === 'function') {
-            try { limiter.resetAll(); } catch (_) {}
+            try {
+              limiter.resetAll();
+            } catch (_) {}
           } else if (limiter && limiter.store && typeof limiter.store.clear === 'function') {
-            try { limiter.store.clear(); } catch (_) {}
+            try {
+              limiter.store.clear();
+            } catch (_) {}
           }
         }
       }
@@ -53,9 +57,13 @@ app.resetRateLimit = async () => {
       if (app.locals.rateLimitTracking && app.locals.rateLimitTracking.limiters) {
         for (const limiter of app.locals.rateLimitTracking.limiters) {
           if (limiter && typeof limiter.resetAll === 'function') {
-            try { limiter.resetAll(); } catch (_) {}
+            try {
+              limiter.resetAll();
+            } catch (_) {}
           } else if (limiter && limiter.store && typeof limiter.store.clear === 'function') {
-            try { limiter.store.clear(); } catch (_) {}
+            try {
+              limiter.store.clear();
+            } catch (_) {}
           }
         }
         // also reset the tracking object
@@ -75,10 +83,13 @@ const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const subcategoryRoutes = require('./routes/subcategoryRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const userRoutes = require('./routes/userRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const newsletterRoutes = require('./routes/newsletterRoutes');
 const supportRoutes = require('./routes/supportRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+const adminContactRoutes = require('./routes/adminContactRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const returnsRoutes = require('./routes/returnsRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
@@ -86,6 +97,7 @@ const couponRoutes = require('./routes/couponRoutes');
 const shippingRoutes = require('./routes/shippingRoutes');
 const taxRoutes = require('./routes/taxRoutes');
 const healthRoutes = require('./routes/healthRoutes');
+const adminAnalyticsRoutes = require('./routes/adminAnalyticsRoutes');
 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const db = require('./config/db');
@@ -99,10 +111,13 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/subcategories', subcategoryRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/admin/contact', adminContactRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/returns', returnsRoutes);
 app.use('/api/wishlist', wishlistRoutes);
@@ -111,6 +126,7 @@ app.use('/api/shipping', shippingRoutes);
 app.use('/api/tax', taxRoutes);
 // Health endpoints (lightweight readiness / liveness checks)
 app.use('/api/health', healthRoutes);
+app.use('/api/admin/analytics', adminAnalyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -4,19 +4,26 @@ const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const rateLimit = require('express-rate-limit');
 
+
 // Rate limiting for login attempts
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
-  message: 'Too many login attempts, please try again after 15 minutes',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+let loginLimiter;
+if (process.env.NODE_ENV === 'development') {
+  // No rate limiting in development
+  loginLimiter = (req, res, next) => next();
+} else {
+  loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
+    message: 'Too many login attempts, please try again after 15 minutes',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+}
 
 // Rate limiting for other routes
 const apiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'development' ? 10000 : 100, // much higher in dev
   message: 'Too many requests, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
@@ -123,7 +130,9 @@ const protect = asyncHandler(async (req, res, next) => {
       }
     }
 
-    if (process.env.NODE_ENV !== 'test' && !user.isVerified) {
+    // Require email verification only in production or when explicitly enabled
+    const requireVerification = process.env.NODE_ENV === 'production' || process.env.REQUIRE_EMAIL_VERIFICATION === 'true';
+    if (requireVerification && !user.isVerified) {
       throw new AppError('Please verify your email first', 401);
     }
 

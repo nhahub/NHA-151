@@ -10,12 +10,21 @@ const createProductValidation = [
     .withMessage('Product name is required')
     .isLength({ min: 2, max: 100 })
     .withMessage('Name must be 2-100 chars'),
-  body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),
+  body('price')
+    .notEmpty()
+    .withMessage('Price is required')
+    .isFloat({ min: 0 })
+    .withMessage('Price must be a positive number'),
   body('category')
     .notEmpty()
-    .withMessage('Category is required')
-    .isMongoId()
-    .withMessage('Invalid category ID'),
+    .withMessage('Category is required'),
+  // All other fields are optional
+  body('description').optional().trim(),
+  body('subcategory').optional(),
+  body('countInStock').optional(),
+  body('images').optional(),
+  body('careInfo').optional(),
+  body('features').optional(),
 ];
 
 
@@ -182,43 +191,27 @@ const updateProfileValidation = [
 
 const productValidation = [
   body('name')
+    .optional()
     .trim()
-    .customSanitizer(sanitizeHTML)
-    .notEmpty()
-    .withMessage('Product name is required')
     .isLength({ min: 2, max: 100 })
     .withMessage('Product name must be between 2 and 100 characters'),
   body('description')
-    .trim()
-    .customSanitizer(sanitizeHTML)
-    .notEmpty()
-    .withMessage('Description is required')
-    .isLength({ min: 10, max: 2000 })
-    .withMessage('Description must be between 10 and 2000 characters'),
-  priceValidation,
-  body('category').custom(isValidObjectId).withMessage('Invalid category ID'),
+    .optional()
+    .trim(),
+  body('price')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Price must be a positive number'),
+  body('category')
+    .optional(),
   body('subcategory')
-    .optional()
-    .custom(isValidObjectId)
-    .withMessage('Invalid subcategory ID'),
+    .optional(),
   body('countInStock')
-    .isInt({ min: 0 })
-    .withMessage('Count in stock must be a non-negative integer'),
-  body('images').optional().isArray().withMessage('Images must be an array'),
-  body('images.*').optional().isURL().withMessage('Image URL must be valid'),
-  body('variants')
-    .optional()
-    .isArray()
-    .withMessage('Variants must be an array'),
-  body('variants.*.name')
-    .optional()
-    .trim()
-    .notEmpty()
-    .withMessage('Variant name is required'),
-  body('variants.*.options')
-    .optional()
-    .isArray()
-    .withMessage('Variant options must be an array'),
+    .optional(),
+  body('images').optional(),
+  body('careInfo').optional(),
+  body('features').optional(),
+  body('variants').optional(),
 ];
 
 const categoryValidation = [
@@ -291,7 +284,7 @@ const orderValidation = [
     .trim()
     .notEmpty()
     .withMessage('Payment method is required')
-    .isIn(['paytabs'])
+    .isIn(['paytabs','credit','paypal','cod'])
     .withMessage('Invalid payment method'),
 ];
 
@@ -517,6 +510,7 @@ module.exports = {
   registerValidation,
   loginValidation,
   updateProfileValidation,
+  createProductValidation,
   productValidation,
   categoryValidation,
   subcategoryValidation,

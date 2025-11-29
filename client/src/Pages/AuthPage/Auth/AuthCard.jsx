@@ -119,7 +119,7 @@ export function SignupForm({ className, defaultMode, ...props }) {
 
       // بعد نجاح العملية خزني بيانات المستخدم في Redux وLocalStorage
       const userData = response.data;
-      console.log(userData);
+
       dispatch(
         loginSuccess({
           user: {
@@ -132,7 +132,7 @@ export function SignupForm({ className, defaultMode, ...props }) {
         })
       );
 
-      // Store token in localStorage
+      // نحفظ التوكن في localStorage يدويًا (كاحتياط)
       if (userData.token) {
         localStorage.setItem("token", userData.token);
       }

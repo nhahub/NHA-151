@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { createContactMessage } from "../../lib/api/api";
 import {
   Mail,
   Phone,
@@ -20,6 +21,32 @@ const markerIcon = new L.Icon({
 });
 
 export default function Contact() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async () => {
+    setError(null);
+    setSuccess(null);
+    if (!name || !email || !message) {
+      setError('Please fill all fields.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await createContactMessage({ name, email, subject: `Contact from ${name}`, message });
+      setSuccess('Message sent. Thank you!');
+      setName(''); setEmail(''); setMessage('');
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to send message');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-[oklch(0.96_0.04_115)] text-[oklch(30%_0.01_285)]">
       {/* Hero Section */}
@@ -44,12 +71,15 @@ export default function Contact() {
             <h2 className="text-2xl font-semibold text-[oklch(60%_0.15_130)] mb-6">
               Send Us a Message
             </h2>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div>
                 <label className="block text-sm font-medium mb-1 text-[oklch(45%_0.1_130)]">
                   Full Name
                 </label>
                 <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  id="contact-name"
                   type="text"
                   placeholder="Your name"
                   className="w-full px-4 py-2 border border-[oklch(0.75_0.12_125)]/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-[oklch(60%_0.15_130)]"
@@ -61,6 +91,9 @@ export default function Contact() {
                   Email Address
                 </label>
                 <input
+                  id="contact-email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   placeholder="you@example.com"
                   className="w-full px-4 py-2 border border-[oklch(0.75_0.12_125)]/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-[oklch(60%_0.15_130)]"
@@ -72,18 +105,28 @@ export default function Contact() {
                   Message
                 </label>
                 <textarea
+                  id="contact-message"
                   rows="5"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   placeholder="Write your message here..."
                   className="w-full px-4 py-2 border border-[oklch(0.75_0.12_125)]/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-[oklch(60%_0.15_130)]"
                 ></textarea>
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-[oklch(60%_0.15_130)] text-white py-2 rounded-lg font-semibold hover:bg-[oklch(60%_0.15_130)]/90 shadow-sm transition-colors"
-              >
-                Send Message
-              </button>
+              <div>
+                {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
+                {success && <div className="mb-2 text-sm text-green-600">{success}</div>}
+                <button
+                  id="contact-submit"
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="w-full bg-[oklch(60%_0.15_130)] text-white py-2 rounded-lg font-semibold hover:bg-[oklch(60%_0.15_130)]/90 shadow-sm transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Sending...' : 'Send Message'}
+                </button>
+              </div>
             </form>
           </div>
 

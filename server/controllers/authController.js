@@ -1,4 +1,3 @@
-
 const asyncHandler = require('express-async-handler');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -363,6 +362,55 @@ const updatePassword = asyncHandler(async (req, res) => {
   res.json({ message: 'Password updated successfully' });
 });
 
+const updateAdminPassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    res.status(400);
+    throw new Error('Current and new passwords are required');
+  }
+
+  const user = await User.findById(req.user._id).select('+password');
+
+  if (!user || !(await user.matchPassword(currentPassword))) {
+    res.status(401);
+    throw new Error('Current password is incorrect');
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  res.status(200).json({ message: 'Password updated successfully' });
+});
+
+const updateAdminProfile = asyncHandler(async (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    res.status(400);
+    throw new Error('Name and email are required');
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  user.name = name;
+  user.email = email;
+
+  await user.save();
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    isAdmin: user.isAdmin,
+  });
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -376,4 +424,6 @@ module.exports = {
   getUserProfile,
   updateUserProfile,
   updatePassword,
+  updateAdminPassword,
+  updateAdminProfile,
 };

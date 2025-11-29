@@ -9,142 +9,7 @@ import {
   CardFooter,
 } from "../../Components/ui/card";
 import { Link } from "react-router";
-
-const productsData = [
-  {
-    id: 1,
-    name: "Snake Plant",
-    img: "https://images.squarespace-cdn.com/content/v1/54fbb611e4b0d7c1e151d22a/1610074066643-OP8HDJUWUH8T5MHN879K/Snake+Plant.jpg?format=1000w",
-    price: 95,
-    category: "Indoor",
-    description:
-      "The Snake Plant is known for its tall, sword-like green leaves edged in yellow. It's one of the easiest indoor plants to care for, perfect for beginners and busy people.",
-    careInfo: {
-      watering:
-        "Water lightly every 2–3 weeks, allowing soil to dry between waterings.",
-      light: "Low to bright indirect light (very adaptable).",
-      humidity: "Average room humidity (40–50%).",
-      temperature: "60–85°F (15–29°C).",
-      fertilizer: "Feed twice per year with cactus or succulent fertilizer.",
-    },
-    features: [
-      "Air-purifying qualities",
-      "Low light tolerant",
-      "Extremely hardy",
-      "Ideal for beginners",
-    ],
-  },
-  {
-    id: 2,
-    name: "Peace Lily",
-    img: "https://www.mydomaine.com/thmb/N3StDx3PyGbF0Pwafv-P9-qiNZU=/900x0/filters:no_upscale():strip_icc()/1566417254329_20190821-1566417255317-b9314f1d9f7a4668a466c5ffb1913a8f.jpg",
-    price: 48,
-    category: "Indoor",
-    description:
-      "The Peace Lily features shiny green leaves and elegant white blooms that symbolize purity and tranquility. It thrives in indoor environments with moderate care.",
-    careInfo: {
-      watering: "Keep soil consistently moist, water about once a week.",
-      light: "Medium, indirect sunlight.",
-      humidity: "High humidity preferred (60–70%).",
-      temperature: "65–80°F (18–27°C).",
-      fertilizer: "Feed every 6 weeks during growing season.",
-    },
-    features: [
-      "Air-purifying",
-      "Blooms multiple times yearly",
-      "Elegant and calming",
-      "Pet caution advised",
-    ],
-  },
-  {
-    id: 3,
-    name: "Ficus",
-    img: "https://nurserylive.com/cdn/shop/products/nurserylive-g-ficus-benjamina-weeping-fig-plant-204240_512x512.jpg?v=1679750033",
-    price: 80,
-    category: "Indoor",
-    description:
-      "Ficus is a small indoor tree with glossy green leaves that bring a fresh, natural vibe to your space. It's ideal for bright corners and home offices.",
-    careInfo: {
-      watering: "Water weekly, allowing the top inch of soil to dry first.",
-      light: "Bright, indirect light.",
-      humidity: "Moderate humidity (50–60%).",
-      temperature: "65–75°F (18–24°C).",
-      fertilizer: "Feed monthly during growing season.",
-    },
-    features: [
-      "Mini indoor tree look",
-      "Improves air quality",
-      "Great for home décor",
-      "Requires moderate care",
-    ],
-  },
-  {
-    id: 4,
-    name: "Pothos",
-    img: "https://media.houseandgarden.co.uk/photos/64bff5f4d6a55acd0397054e/1:1/w_1342,h_1342,c_limit/Screenshot%202023-07-25%20at%2017.17.10.png",
-    price: 32,
-    category: "Indoor",
-    description:
-      "Pothos is a beautiful trailing vine with heart-shaped green leaves and yellow or white variegation. Perfect for hanging baskets or shelves.",
-    careInfo: {
-      watering: "Water every 1–2 weeks, letting soil dry between waterings.",
-      light: "Low to bright indirect light.",
-      humidity: "Average humidity (40–60%).",
-      temperature: "60–85°F (15–29°C).",
-      fertilizer: "Feed monthly during spring and summer.",
-    },
-    features: [
-      "Fast-growing vine",
-      "Tolerates low light",
-      "Air-purifying",
-      "Great for decorative displays",
-    ],
-  },
-  {
-    id: 5,
-    name: "Aloe Vera",
-    img: "https://cdn.shopify.com/s/files/1/0004/2654/1108/files/acheter-plante-aloe-vera-barbadensis-517144.jpg?v=1718903952",
-    price: 64,
-    category: "Indoor",
-    description:
-      "Aloe Vera is a hardy succulent known for its healing gel. Its thick green leaves make it a stylish and practical plant for sunny spots.",
-    careInfo: {
-      watering: "Water every 2–3 weeks; let soil dry completely.",
-      light: "Bright, direct sunlight (at least 6 hours daily).",
-      humidity: "Low humidity tolerant.",
-      temperature: "60–80°F (16–27°C).",
-      fertilizer: "Feed 2–3 times a year with succulent fertilizer.",
-    },
-    features: [
-      "Medicinal gel inside leaves",
-      "Drought tolerant",
-      "Air-purifying",
-      "Easy to care for",
-    ],
-  },
-  {
-    id: 6,
-    name: "ZZ Plant",
-    img: "https://shopaltmanplants.com/cdn/shop/files/6IN_Foliage_Zamia_ZZ_Plant_Lifestyle_final_4.jpg?v=1741815498",
-    price: 110,
-    category: "Indoor",
-    description:
-      "The ZZ Plant features shiny dark green leaves and thrives on neglect. It’s one of the toughest indoor plants, perfect for any lighting conditions.",
-    careInfo: {
-      watering: "Water every 2–3 weeks, allowing soil to dry out fully.",
-      light: "Low to medium indirect light.",
-      humidity: "Average indoor humidity (30–50%).",
-      temperature: "60–75°F (15–24°C).",
-      fertilizer: "Feed lightly twice a year.",
-    },
-    features: [
-      "Low maintenance",
-      "Thrives in low light",
-      "Air-purifying",
-      "Perfect for beginners",
-    ],
-  },
-];
+import { useSelector } from "react-redux";
 
 // Helper component for product card
 const ProductCard = ({ product }) => (
@@ -152,7 +17,7 @@ const ProductCard = ({ product }) => (
     <CardHeader className="relative p-0 overflow-hidden bg-gray-50">
       <div className="relative overflow-hidden aspect-4/3">
         <img
-          src={product.img}
+          src={product.images[0]?.url}
           alt={product.name}
           loading="lazy"
           className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
@@ -176,7 +41,7 @@ const ProductCard = ({ product }) => (
     <CardFooter className="flex items-center justify-between gap-4 px-5 pb-5">
       <span className="text-xl font-bold text-primary">${product.price}</span>
       <Button className="px-4 py-2 text-sm font-semibold transition-all duration-200 rounded-full hover:shadow-lg bg-primary text-secondary hover:bg-primary/90">
-        <Link to={`/plantdetails/${product.id}`}>View Details</Link>
+        <Link to={`/plantdetails/${product._id}`}>View Details</Link>
       </Button>
     </CardFooter>
   </Card>
@@ -186,6 +51,12 @@ export default function Indoor() {
   const [maxPrice, setMaxPrice] = useState(150);
   const [sortOrder, setSortOrder] = useState("asc");
 
+  // Get products from Redux, fallback to static data if empty
+  const products = useSelector((state) => state.products.items.products);
+
+  const stableProducts = useMemo(() => products || [], [products]);
+  console.log(products);
+
   const sortOptions = useMemo(
     () => [
       { label: "Price: Low to High", value: "asc" },
@@ -194,16 +65,17 @@ export default function Indoor() {
     []
   );
 
-  // Filter only indoor plants
-  const filteredProducts = useMemo(
-    () =>
-      productsData
-        .filter((product) => product.price <= maxPrice)
-        .sort((a, b) =>
-          sortOrder === "asc" ? a.price - b.price : b.price - a.price
-        ),
-    [maxPrice, sortOrder]
-  );
+  // Filter indoor plants, apply budget and sorting
+  const filteredProducts = useMemo(() => {
+    return stableProducts
+      .filter((product) => product.category === "Indoor")
+      .filter((product) => product.price <= maxPrice)
+      .sort((a, b) =>
+        sortOrder === "asc" ? a.price - b.price : b.price - a.price
+      );
+  }, [stableProducts, maxPrice, sortOrder]);
+
+  console.log(filteredProducts);
 
   const inputStyles = `w-full px-3 py-2.5 text-sm font-medium rounded-xl border transition-all duration-200 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`;
 
@@ -323,7 +195,7 @@ export default function Indoor() {
         {filteredProducts.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         ) : (

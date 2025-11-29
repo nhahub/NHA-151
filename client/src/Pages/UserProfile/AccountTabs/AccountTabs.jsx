@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Tab } from "@headlessui/react";
 import { User, MapPin, ShoppingCart, Lock } from "lucide-react";
 import OrdersTable from "../OrdersTable/OrdersTable";
-import { motion } from "framer-motion";
+import ProfileForm from "../ProfileForm/ProfileForm";
 
 const tabs = [
   { name: "Profile", icon: User },
@@ -18,17 +18,14 @@ const AccountTabs = ({ user, onUpdate }) => {
     { id: 1, label: "Home", address: "123 Main St, Cairo, Egypt" },
     { id: 2, label: "Office", address: "456 Work Ave, Cairo, Egypt" },
   ]);
-
   const [editingAddress, setEditingAddress] = useState(null);
 
   const handleSaveAddress = (addr) => {
     if (addr.id) {
-      // Update existing
       setAddresses((prev) =>
         prev.map((a) => (a.id === addr.id ? { ...a, ...addr } : a))
       );
     } else {
-      // Add new
       setAddresses((prev) => [...prev, { ...addr, id: Date.now() }]);
     }
     setEditingAddress(null);
@@ -37,12 +34,12 @@ const AccountTabs = ({ user, onUpdate }) => {
   return (
     <Tab.Group>
       {/* Tab Navigation */}
-      <Tab.List className="flex p-1 mb-4 space-x-1 bg-white shadow rounded-2xl">
+      <Tab.List className="flex p-1 mb-4 space-x-1 overflow-x-auto bg-white shadow rounded-2xl">
         {tabs.map((tab) => (
           <Tab
             key={tab.name}
             className={({ selected }) =>
-              `flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-medium ${
+              `flex items-center gap-2 px-4 py-2 shrink-0 rounded-2xl text-sm font-medium ${
                 selected
                   ? "bg-primary text-white"
                   : "text-secondary hover:bg-gray-100"
@@ -58,50 +55,22 @@ const AccountTabs = ({ user, onUpdate }) => {
       <Tab.Panels className="space-y-4">
         {/* Profile Tab */}
         <Tab.Panel>
-          <div className="p-6 space-y-4 bg-white shadow rounded-2xl">
+          <div className="w-full max-w-full p-4 space-y-4 bg-white shadow sm:p-6 rounded-2xl">
             <h3 className="text-lg font-semibold text-primary">Profile Info</h3>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-secondary">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={user?.fullName || ""}
-                  onChange={(e) => onUpdate({ fullName: e.target.value })}
-                  className="w-full p-2 mt-1 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-secondary">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={user?.email || ""}
-                  onChange={(e) => onUpdate({ email: e.target.value })}
-                  className="w-full p-2 mt-1 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <button className="px-4 py-2 font-medium text-white shadow rounded-xl bg-primary hover:bg-primary/90">
-                Save Changes
-              </button>
-            </form>
+
+            {/* Local state for editing */}
+            <ProfileForm user={user} onUpdate={onUpdate} />
           </div>
         </Tab.Panel>
 
         {/* Addresses Tab */}
         <Tab.Panel>
-          <div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="p-6 space-y-4 bg-white shadow rounded-2xl"
-          >
+          <div className="w-full max-w-full p-4 space-y-4 bg-white shadow sm:p-6 rounded-2xl">
             <h3 className="text-lg font-semibold text-primary">Address Book</h3>
             {addresses.map((addr) => (
               <div
                 key={addr.id}
-                className="flex items-center justify-between p-4 border rounded-xl hover:shadow"
+                className="flex flex-col items-start justify-between gap-2 p-4 border sm:flex-row sm:items-center rounded-xl hover:shadow"
               >
                 <span>
                   {addr.label}: {addr.address}
@@ -125,7 +94,7 @@ const AccountTabs = ({ user, onUpdate }) => {
 
             {/* Address Modal */}
             {editingAddress && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
                 <div className="w-full max-w-md p-6 bg-white shadow-xl rounded-2xl">
                   <h4 className="mb-4 text-lg font-semibold text-primary">
                     {editingAddress.id ? "Edit Address" : "Add Address"}
@@ -190,7 +159,7 @@ const AccountTabs = ({ user, onUpdate }) => {
 
         {/* Security Tab */}
         <Tab.Panel>
-          <div className="p-6 space-y-4 bg-white shadow rounded-2xl">
+          <div className="w-full max-w-full p-4 space-y-4 bg-white shadow sm:p-6 rounded-2xl">
             <h3 className="text-lg font-semibold text-primary">
               Change Password
             </h3>

@@ -1,3 +1,4 @@
+// ...existing code...
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -13,6 +14,7 @@ import {
 import { Button } from "../../ui/button";
 import { useSafeCart } from "./useCart";
 import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
 
 // Cart Item Component
 const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
@@ -97,9 +99,14 @@ export default function Cart({ isOpen, onClose }) {
   const navigate = useNavigate();
   const cartContext = useSafeCart();
 
-  const [localCartItems, setLocalCartItems] = useState(null);
+  // initialize localCartItems as empty array to avoid null issues
+  const [localCartItems, setLocalCartItems] = useState([]);
 
-  const cartItems = cartContext?.cartItems || localCartItems;
+  // get login status from redux
+  const isLoggedIn = useSelector((state) => state?.auth?.isLoggedIn);
+
+  // prefer context items, fallback to local items, ensure array
+  const cartItems = cartContext?.cartItems ?? localCartItems ?? [];
   const isCartOpen = cartContext?.isCartOpen ?? isOpen;
 
   const cartSummary = useMemo(() => {
@@ -151,6 +158,11 @@ export default function Cart({ isOpen, onClose }) {
     navigate("/indoor");
   };
 
+  const handleGoToSignin = () => {
+    handleClose();
+    navigate("/signin");
+  };
+
   return (
     <AnimatePresence>
       {(isCartOpen || isOpen) && (
@@ -166,140 +178,174 @@ export default function Cart({ isOpen, onClose }) {
             aria-hidden="true"
           />
 
-          {/* Drawer */}
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 bottom-0 right-0 z-50 w-full max-w-lg overflow-hidden bg-lime-100"
-          >
-            {/* Subtle background gradient */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-30"
-              style={{
-                background: `radial-gradient(circle at top right, oklch(45.3% 0.124 130.933)/15 0%, transparent 60%)`,
-              }}
-            />
-
-            <div className="relative flex flex-col h-full">
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-primary/15 bg-secondary/2">
-                <div className="flex items-center gap-3">
-                  <ShoppingBag className="w-6 h-6 text-primary" />
-                  <div>
-                    <h2 className="text-2xl font-bold text-secondary">
-                      Your Cart
-                    </h2>
-                    <p className="text-sm mt-0.5 text-secondary/70">
-                      {cartItems.length}{" "}
-                      {cartItems.length === 1 ? "item" : "items"}
-                    </p>
-                  </div>
+          {/* If user is not logged in show full-screen message and login button */}
+          {!isLoggedIn ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-lime-100"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="w-full max-w-lg p-8 mx-4 text-center bg-white shadow-sm rounded-2xl border-primary/10">
+                <ShoppingBag className="w-16 h-16 mx-auto mb-4 text-primary/30" />
+                <h3 className="mb-2 text-xl font-semibold text-secondary">
+                  You need to log in to see your cart
+                </h3>
+                <p className="mb-6 text-sm text-secondary/70">
+                  Please sign in to view and manage your cart items.
+                </p>
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleGoToSignin}
+                    className="px-6 py-3 font-semibold transition-all duration-200 rounded-full bg-primary text-secondary hover:bg-primary/90"
+                  >
+                    Go to Signin
+                  </Button>
                 </div>
-                <button
-                  onClick={handleClose}
-                  className="flex items-center justify-center w-10 h-10 transition-all duration-200 rounded-full bg-secondary/5 text-secondary hover:bg-secondary/15"
-                  aria-label="Close cart"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </div>
+            </motion.div>
+          ) : (
+            /* Drawer (original right-side drawer preserved exactly) */
+            <>
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed top-0 bottom-0 right-0 z-50 w-full max-w-lg overflow-hidden bg-lime-100"
+              >
+                {/* Subtle background gradient */}
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-30"
+                  style={{
+                    background: `radial-gradient(circle at top right, oklch(45.3% 0.124 130.933)/15 0%, transparent 60%)`,
+                  }}
+                />
 
-              {/* Cart Items */}
-              <div className="flex-1 px-6 py-6 overflow-y-auto">
-                {cartItems.length > 0 ? (
-                  <div className="space-y-4">
-                    <AnimatePresence mode="popLayout">
-                      {cartItems.map((item) => (
-                        <CartItem
-                          key={item.id}
-                          item={item}
-                          onUpdateQuantity={handleUpdateQuantity}
-                          onRemove={handleRemoveItem}
-                        />
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-center">
-                    <ShoppingBag className="w-16 h-16 mb-4 text-primary/30" />
-                    <h3 className="mb-2 text-xl font-semibold text-secondary">
-                      Your cart is empty
-                    </h3>
-                    <p className="mb-6 text-sm text-secondary/70">
-                      Add some beautiful plants to get started!
-                    </p>
-                    <Button
-                      onClick={handleContinueShopping}
-                      className="px-6 py-3 font-semibold transition-all duration-200 rounded-full bg-primary text-secondary hover:bg-primary/90"
+                <div className="relative flex flex-col h-full">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-6 py-5 border-b border-primary/15 bg-secondary/2">
+                    <div className="flex items-center gap-3">
+                      <ShoppingBag className="w-6 h-6 text-primary" />
+                      <div>
+                        <h2 className="text-2xl font-bold text-secondary">
+                          Your Cart
+                        </h2>
+                        <p className="text-sm mt-0.5 text-secondary/70">
+                          {cartItems.length}{" "}
+                          {cartItems.length === 1 ? "item" : "items"}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleClose}
+                      className="flex items-center justify-center w-10 h-10 transition-all duration-200 rounded-full bg-secondary/5 text-secondary hover:bg-secondary/15"
+                      aria-label="Close cart"
                     >
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Continue Shopping
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Cart Summary */}
-              {cartItems.length > 0 && (
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="px-6 py-6 border-t border-primary/15 bg-secondary/2"
-                >
-                  <div className="mb-6 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-secondary/80">
-                        Subtotal
-                      </span>
-                      <span className="text-base font-semibold text-secondary">
-                        ${cartSummary.subtotal.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-secondary/80">
-                        Estimated Tax
-                      </span>
-                      <span className="text-base font-semibold text-secondary">
-                        ${cartSummary.tax.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between pt-3 border-t">
-                      <span className="text-lg font-bold text-secondary">
-                        Total
-                      </span>
-                      <span className="text-2xl font-bold text-primary">
-                        ${cartSummary.total.toFixed(2)}
-                      </span>
-                    </div>
+                      <X className="w-5 h-5" />
+                    </button>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="space-y-3">
-                    <Button
-                      onClick={handleCheckout}
-                      className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 rounded-full hover:shadow-lg bg-primary text-secondary hover:bg-primary/90"
-                    >
-                      Proceed to Checkout
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </Button>
-                    <Button
-                      onClick={handleContinueShopping}
-                      variant="outline"
-                      className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 bg-transparent border-2 rounded-full border-primary/30 text-secondary hover:bg-primary/10 hover:border-primary"
-                    >
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Continue Shopping
-                    </Button>
+                  {/* Cart Items */}
+                  <div className="flex-1 px-6 py-6 overflow-y-auto">
+                    {cartItems.length > 0 ? (
+                      <div className="space-y-4">
+                        <AnimatePresence mode="popLayout">
+                          {cartItems.map((item) => (
+                            <CartItem
+                              key={item.id}
+                              item={item}
+                              onUpdateQuantity={handleUpdateQuantity}
+                              onRemove={handleRemoveItem}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <ShoppingBag className="w-16 h-16 mb-4 text-primary/30" />
+                        <h3 className="mb-2 text-xl font-semibold text-secondary">
+                          Your cart is empty
+                        </h3>
+                        <p className="mb-6 text-sm text-secondary/70">
+                          Add some beautiful plants to get started!
+                        </p>
+                        <Button
+                          onClick={handleContinueShopping}
+                          className="px-6 py-3 font-semibold transition-all duration-200 rounded-full bg-primary text-secondary hover:bg-primary/90"
+                        >
+                          <ArrowLeft className="w-4 h-4 mr-2" />
+                          Continue Shopping
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
+
+                  {/* Cart Summary */}
+                  {cartItems.length > 0 && (
+                    <motion.div
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="px-6 py-6 border-t border-primary/15 bg-secondary/2"
+                    >
+                      <div className="mb-6 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-secondary/80">
+                            Subtotal
+                          </span>
+                          <span className="text-base font-semibold text-secondary">
+                            ${cartSummary.subtotal.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-secondary/80">
+                            Estimated Tax
+                          </span>
+                          <span className="text-base font-semibold text-secondary">
+                            ${cartSummary.tax.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t">
+                          <span className="text-lg font-bold text-secondary">
+                            Total
+                          </span>
+                          <span className="text-2xl font-bold text-primary">
+                            ${cartSummary.total.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="space-y-3">
+                        <Button
+                          onClick={handleCheckout}
+                          className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 rounded-full hover:shadow-lg bg-primary text-secondary hover:bg-primary/90"
+                        >
+                          Proceed to Checkout
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+                        <Button
+                          onClick={handleContinueShopping}
+                          variant="outline"
+                          className="w-full px-6 py-3 text-base font-semibold transition-all duration-200 bg-transparent border-2 rounded-full border-primary/30 text-secondary hover:bg-primary/10 hover:border-primary"
+                        >
+                          <ArrowLeft className="w-4 h-4 mr-2" />
+                          Continue Shopping
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            </>
+          )}
         </>
       )}
     </AnimatePresence>
   );
 }
+// ...existing code...

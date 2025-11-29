@@ -17,13 +17,12 @@ describe('Shipping Controller Tests', () => {
     await Shipping.deleteMany({});
     
     const adminId = new mongoose.Types.ObjectId();
-    const adminIdStr = adminId.toString().slice(0, -1) + 'a';
     const adminJti = new mongoose.Types.ObjectId().toString();
-    
+
     admin = await User.create({
-      _id: adminIdStr,
+      _id: adminId,
       name: 'Admin User',
-      email: `admin.${adminIdStr}@example.com`,
+      email: `admin.${adminId}@example.com`,
       password: 'admin123',
       isAdmin: true,
       sessions: [{
@@ -35,11 +34,12 @@ describe('Shipping Controller Tests', () => {
     });
     adminToken = generateToken(admin._id, { jti: adminJti });
 
+    const userId = new mongoose.Types.ObjectId();
     const userJti = new mongoose.Types.ObjectId().toString();
     user = await User.create({
-      _id: new mongoose.Types.ObjectId(),
+      _id: userId,
       name: 'Test User',
-      email: `user.${Date.now()}@example.com`,
+      email: `user.${userId}@example.com`,
       password: 'password123',
       sessions: [{
         jti: userJti,
@@ -139,6 +139,7 @@ describe('Shipping Controller Tests', () => {
     let shippingId;
 
     beforeEach(async () => {
+      await Shipping.deleteMany({});
       const shipping = await Shipping.create({
         name: 'Standard Shipping',
         carrier: 'USPS',

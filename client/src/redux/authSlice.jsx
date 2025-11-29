@@ -23,11 +23,23 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isLoggedIn = true;
+      
+      // Persist to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      }
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isLoggedIn = false;
+      
+      // Clear localStorage
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
     },
   },
 });

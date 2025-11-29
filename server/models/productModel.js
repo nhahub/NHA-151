@@ -106,9 +106,8 @@ const productSchema = mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
-      minlength: 10,
       maxlength: 2000
     },
     basePrice: {
@@ -226,6 +225,14 @@ const productSchema = mongoose.Schema(
       duration: Number,
       terms: String,
     },
+    careInfo: {
+      watering: String,
+      light: String,
+      humidity: String,
+      temperature: String,
+      fertilizer: String,
+    },
+    features: [String],
   },
   {
     timestamps: true,

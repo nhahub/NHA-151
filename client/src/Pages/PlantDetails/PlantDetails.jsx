@@ -17,7 +17,9 @@ import {
   CardTitle,
 } from "../../Components/ui/card";
 import { useCart } from "../../Components/Common/Cart/useCart";
-import { getProductById } from '@/lib/api/api';
+import { getProductById } from "@/lib/api/api";
+import { useDispatch } from "react-redux";
+import { addToCartThunk } from "../../redux/cartSlice";
 
 // We'll fetch product data from the API instead of using a local mock database
 
@@ -99,6 +101,7 @@ export default function PlantDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let mounted = true;
@@ -110,7 +113,13 @@ export default function PlantDetails() {
         if (!mounted) return;
         setProduct(res.data || null);
       } catch (err) {
-        const msg = err?.response?.data?.message || err.message || 'Product not found';
+        const status = err?.response?.status;
+        if (status === 404) {
+          // Redirect to shop when the product doesn't exist (stale link)
+          navigate('/indoor', { replace: true });
+          return;
+        }
+        const msg = err?.response?.data?.message || err.message || "Product not found";
         if (mounted) setError(msg);
       } finally {
         if (mounted) setLoading(false);
@@ -154,10 +163,14 @@ export default function PlantDetails() {
     addToCart({
       id: prod._id || prod.id,
       name: prod.name,
-      img: prod.images && prod.images[0] ? prod.images[0].url : prod.image || '/placeholder.jpg',
+      img:
+        prod.images && prod.images[0]
+          ? prod.images[0].url
+          : prod.image || "/placeholder.jpg",
       price: prod.price || prod.basePrice || 0,
     });
     openCart();
+    dispatch(addToCartThunk({ productId: product._id, quantity: 1 }));
   };
 
   return (
@@ -187,7 +200,13 @@ export default function PlantDetails() {
             <div className="relative overflow-hidden shadow-lg rounded-2xl bg-gray-50">
               <div className="overflow-hidden aspect-square">
                 <img
-                  src={product.images && product.images[0] ? product.images[0].url : product.image || '/placeholder.jpg'}
+                  src={(() => {
+                    const url = product.images && product.images[0] ? product.images[0].url : product.image || "/placeholder.jpg";
+                    if (!url || typeof url !== 'string') return '/placeholder.jpg';
+                    if (url.includes('/api/products')) return '/placeholder.jpg';
+                    if (url.startsWith('data:') || /^(https?:)?\/\//i.test(url)) return url;
+                    return `${API_ROOT.replace(/\/$/, '')}${url.startsWith('/') ? url : '/' + url}`;
+                  })()}
                   alt={product.name}
                   className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
                   loading="eager"
@@ -201,8 +220,8 @@ export default function PlantDetails() {
           <div className="flex flex-col space-y-6">
             {/* Category Badge */}
             <div>
-                <span className="inline-flex items-center px-3 py-1 text-xs font-semibold tracking-wider uppercase rounded-full bg-primary/15 text-primary">
-                {product.category?.name || product.category || 'Uncategorized'}
+              <span className="inline-flex items-center px-3 py-1 text-xs font-semibold tracking-wider uppercase rounded-full bg-primary/15 text-primary">
+                {product.category?.name || product.category || "Uncategorized"}
               </span>
             </div>
 
@@ -213,7 +232,9 @@ export default function PlantDetails() {
 
             {/* Price */}
             <div className="flex items-baseline gap-2 text-primary">
-              <span className="text-4xl font-bold">${product.price || product.basePrice || 0}</span>
+              <span className="text-4xl font-bold">
+                ${product.price || product.basePrice || 0}
+              </span>
             </div>
 
             {/* Description */}

@@ -23,6 +23,7 @@ export function ForgotPasswordDialog({ forgetPassword, setForgetPassword }) {
     }
 
     console.log("Forgot Password payload:", data);
+    console.log("Payload being sent:", { email: data.email });
 
     try {
       const response = await forgotPassword({ email: data.email });

@@ -12,9 +12,9 @@ describe('Category Controller Tests', () => {
   let admin;
   let user;
 
-  beforeAll(async () => {
-    await User.deleteMany({}); 
-    await Category.deleteMany({}); 
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await Category.deleteMany({});
 
     const { user: adminUser, token } = await createUserAndToken(app, { isAdmin: true });
     admin = adminUser;
@@ -35,9 +35,7 @@ describe('Category Controller Tests', () => {
     }
   });
 
-  beforeEach(async () => {
-    await Category.deleteMany({});
-  });
+  // Removed duplicate beforeEach for Category.deleteMany
 
   describe('POST /api/categories', () => {
     it('should create a category when admin', async () => {

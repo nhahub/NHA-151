@@ -1,19 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserProfile } from "../../lib/api/api";
+import { loginSuccess } from "../../redux/authSlice";
 import ProfileCard from "./ProfileCard/ProfileCard";
 import AccountTabs from "./AccountTabs/AccountTabs";
 
 const UserAccount = () => {
-  const [user, setUser] = useState({
-    avatar: "https://i.pravatar.cc/150?img=32",
-    fullName: "AsMa Ahmed",
-    email: "asma@example.com",
-  });
+  const dispatch = useDispatch();
+  const { user, token } = useSelector((state) => state.auth);
+  console.log(user);
 
-  const handleUpdateProfile = (updatedData) => {
-    setUser((prev) => ({ ...prev, ...updatedData }));
+  // 🔹 تحديث بيانات البروفايل
+  const handleUpdateProfile = async (updatedData) => {
+    try {
+      const res = await updateUserProfile(updatedData);
+
+      // دمج البيانات القديمة مع الجديدة لتجنب فقد أي حقل
+      const updatedUser = { ...user, ...res.data };
+      dispatch(
+        loginSuccess({
+          user: updatedUser,
+          token,
+        })
+      );
+      
+      // Save updated user to localStorage
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      
+      alert("✅ Profile updated successfully!");
+    } catch (err) {
+      console.error("❌ Profile update failed:", err);
+      alert("Failed to update profile");
+    }
   };
+
+  if (!user) return <p className="p-6 text-center">Loading profile...</p>;
 
   return (
     <div className="p-4 md:p-8 bg-[#f7f7f7] min-h-screen">
